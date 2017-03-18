@@ -37,12 +37,52 @@ clear_readline_line() {
 
 # Update READLINE_LINE. This will print a new command in the terminal.
 update_readline_line() {
-    READLINE_LINE="$1"
+    READLINE_LINE="$COMMAND_STR"
 }
 
 # Update READLINE_POINT. This will place the cursor at the specified place.
 update_readline_point() {
     READLINE_POINT="$1"
+}
+
+# Save cursor and clear
+save_and_clear() {
+    tput sc # Save cursor position
+    tput ed # Clear screen
+}
+
+# Restore saved cursor position and clear
+restore_and_clear() {
+    tput rc # Restore cursor position
+    tput ed # Clear screen
+}
+
+# For each user input, update COMMAND_STR with the new char based tree.
+update_command() {
+    COMMAND_STR="$COMMAND_STR walid"
+}
+
+read_user_input() {
+    stop=false # if equal to true, stop read and exit while loop.
+    save_and_clear
+    while ! $stop
+    do
+	display_info
+	echo "$COMMAND_STR"
+	read -sn 1 key
+	case "$key" in
+	    "a")
+		update_command
+		restore_and_clear
+		;;
+	    "q")
+		stop=true
+		restore_and_clear
+		;;
+	    * )
+		restore_and_clear
+	esac
+    done
 }
 
 # echo info message
@@ -53,45 +93,13 @@ display_info() {
     echo -n "$NORMAL"
 } 
 
-read_user_input() {
-    stop=false
-    tput sc
-    tput ed
-    while ! $stop
-    do
-	display_info
-	echo "$COMMAND_STR"
-	read -sn 1 key
-	case "$key" in
-	    "a")
-		COMMAND_STR="$COMMAND_STR walid"
-		tput rc
-		tput ed
-		;;
-	    "b")
-		COMMAND_STR="$COMMAND_STR Fakerr"
-		tput rc
-		tput ed	
-		;;
-	    "q")
-		stop=true
-		tput rc
-		tput ed	
-		;;
-	    * )
-		tput rc
-		tput ed	
-	esac
-    done
-}
-
 # main function
 main() {
-    save_initial_readline
+    save_initial_readline # Save the initial command to restore later
     init_temporary_cmd "$INITIAL_READLINE_LINE"
     clear_readline_line
     read_user_input
-    update_readline_line "$INITIAL_READLINE_LINE"
+    update_readline_line
     update_readline_point 50
 }
 
