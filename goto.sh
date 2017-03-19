@@ -5,9 +5,12 @@
 # WARNING: this is just for test. Should be changed with a not used Key.
 GOTO_KEY="\C-k"               # Key binding to run the program.
 COMMAND_STR=""                # Temporary command line holding the char based tree.
+COMMAND_POINT=""              # Position if selected char.
 INITIAL_READLINE_LINE=""      # Initial command line string.
 INITIAL_READLINE_POINT=""     # Initial command line point.
 CHAR_NODES=()                 # Nodes of the tree's first level.
+CHARS=( {a..z} )
+declare -A node_position
 
 # Set colors
 BLUE=$(tput setaf 2)
@@ -38,7 +41,7 @@ clear_readline_line() {
 
 # Update READLINE_LINE. This will print a new command in the terminal.
 update_readline_line() {
-    READLINE_LINE="$INITIAL_READLINE_LINE"
+    READLINE_LINE="$1"
 }
 
 # Update READLINE_POINT. This will place the cursor at the specified place.
@@ -60,8 +63,7 @@ restore_and_clear() {
 
 # Init tree nodes
 init_tree_nodes() {
-    chars=( {a..z} )
-    for i in "${chars[@]}"
+    for i in "${CHARS[@]}"
     do
 	CHAR_NODES+=("$REVERSE$BLUE$i$NORMAL")
     done
@@ -71,44 +73,68 @@ init_tree_nodes() {
 update_command() {
     key="$1"
     index=0
+    tmp_cmd="$INITIAL_READLINE_LINE"
+    tmp_ind=0
+    node_position=()
     for (( i=0; i<${#COMMAND_STR}; i++ )); do
-	char="${COMMAND_STR:$i:1}"
-	if [[ "$char" == "$key" ]]; then
-	    node=${CHAR_NODES[$index]}
-	    COMMAND_STR="${COMMAND_STR:0:$i}$node${COMMAND_STR:$(( i + 1 ))}"
+	if [[ "${COMMAND_STR:$i:1}" == "$key" ]]; then
+	    NODE=${CHAR_NODES[$index]}
+	    tmp_cmd="${tmp_cmd:0:$tmp_ind}$NODE${tmp_cmd:$(( tmp_ind + 1 ))}"
+	    tmp_ind=$(( tmp_ind + ${#NODE} - 1 ))
+
+	    node_label=${CHARS[$index]}
+	    node_position["$node_label"]="$i"
+
 	    index=$(( index + 1 ))
 	fi
+	tmp_ind=$(( tmp_ind + 1 ))
     done
+    COMMAND_STR="$tmp_cmd"
 }
 
 read_user_input() {
-    stop=false # if equal to true, stop read and exit while loop.
+    #stop=false # if equal to true, stop read and exit while loop.
     save_and_clear
-    while ! $stop
-    do
-	display_info
-	echo "$COMMAND_STR"
-	read -sn 1 key
-	case "$key" in
-	    "a")
-		update_command "$key"
-		restore_and_clear
-		;;
-	    "q")
-		stop=true
-		restore_and_clear
-		;;
-	    * )
-		restore_and_clear
-	esac
-    done
+
+    display_info
+    echo "$COMMAND_STR"
+    read -sn 1 key
+
+    update_command "$key"
+    restore_and_clear
+
+    display_info
+    echo "$COMMAND_STR"
+    read -sn 1 key2
+
+    COMMAND_POINT="${node_position["$key2"]}"
+    restore_and_clear
+
+    # while ! $stop
+    # do
+    #	display_info
+    #	echo "$COMMAND_STR"
+    #	read -sn 1 key
+    #	case "$key" in
+    #	    "a")
+    #		update_command "$key"
+    #		restore_and_clear
+    #		;;
+    #	    "q")
+    #		stop=true
+    #		restore_and_clear
+    #		;;
+    #	    * )
+    #		restore_and_clear
+    #	esac
+    # done
 }
 
 # echo info message
 display_info() {
     echo -n "$REVERSE"
     echo -n "$YELLOW"
-    echo "goto: "
+    echo "goto:"
     echo -n "$NORMAL"
 } 
 
@@ -124,7 +150,7 @@ main() {
     read_user_input
 
     # Update READLINE
-    update_readline_line
-    update_readline_point 50
+    update_readline_line "$INITIAL_READLINE_LINE"
+    update_readline_point "$COMMAND_POINT"
 }
 
