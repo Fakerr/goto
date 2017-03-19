@@ -7,9 +7,10 @@ GOTO_KEY="\C-k"               # Key binding to run the program.
 COMMAND_STR=""                # Temporary command line holding the char based tree.
 INITIAL_READLINE_LINE=""      # Initial command line string.
 INITIAL_READLINE_POINT=""     # Initial command line point.
+CHAR_NODES=()                 # Nodes of the tree's first level.
 
 # Set colors
-GREEN=$(tput setaf 4)
+BLUE=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 NORMAL=$(tput sgr0)
 REVERSE=$(tput rev)
@@ -37,7 +38,7 @@ clear_readline_line() {
 
 # Update READLINE_LINE. This will print a new command in the terminal.
 update_readline_line() {
-    READLINE_LINE="$COMMAND_STR"
+    READLINE_LINE="$INITIAL_READLINE_LINE"
 }
 
 # Update READLINE_POINT. This will place the cursor at the specified place.
@@ -57,9 +58,27 @@ restore_and_clear() {
     tput ed # Clear screen
 }
 
+# Init tree nodes
+init_tree_nodes() {
+    chars=( {a..z} )
+    for i in "${chars[@]}"
+    do
+	CHAR_NODES+=("$REVERSE$BLUE$i$NORMAL")
+    done
+}
+
 # For each user input, update COMMAND_STR with the new char based tree.
 update_command() {
-    COMMAND_STR="$COMMAND_STR walid"
+    key="$1"
+    index=0
+    for (( i=0; i<${#COMMAND_STR}; i++ )); do
+	char="${COMMAND_STR:$i:1}"
+	if [[ "$char" == "$key" ]]; then
+	    node=${CHAR_NODES[$index]}
+	    COMMAND_STR="${COMMAND_STR:0:$i}$node${COMMAND_STR:$(( i + 1 ))}"
+	    index=$(( index + 1 ))
+	fi
+    done
 }
 
 read_user_input() {
@@ -72,7 +91,7 @@ read_user_input() {
 	read -sn 1 key
 	case "$key" in
 	    "a")
-		update_command
+		update_command "$key"
 		restore_and_clear
 		;;
 	    "q")
@@ -95,10 +114,16 @@ display_info() {
 
 # main function
 main() {
-    save_initial_readline # Save the initial command to restore later
+    # Initialization
+    init_tree_nodes
+    save_initial_readline
     init_temporary_cmd "$INITIAL_READLINE_LINE"
+
+    # Clear readline and wait for user input
     clear_readline_line
     read_user_input
+
+    # Update READLINE
     update_readline_line
     update_readline_point 50
 }
