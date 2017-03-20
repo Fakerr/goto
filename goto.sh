@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 
-
 # Global variables
 # WARNING: this is just for test. Should be changed with a not used Key.
 GOTO_KEY="\C-k"               # Key binding to run the program.
@@ -75,13 +74,16 @@ init_tree_nodes() {
 
 # For each user input, update COMMAND_STR with the new char based tree.
 generate_tree() {
-    key="$1"
+    key=$1
+    upper_key="${key^^}"
+    lower_key="${key,,}"
     index=0
     tmp_cmd="$INITIAL_READLINE_LINE"
     tmp_ind=0
     node_position=()
     for (( i=0; i<${#COMMAND_STR}; i++ )); do
-	if [[ "${COMMAND_STR:$i:1}" == "$key" ]]; then
+	char="${COMMAND_STR:$i:1}"
+	if [[ "$char" == "$upper_key" ]] || [[ "$char" == "$lower_key" ]]; then
 	    NODE=${CHAR_NODES[$index]}
 	    tmp_cmd="${tmp_cmd:0:$tmp_ind}$NODE${tmp_cmd:$(( tmp_ind + 1 ))}"
 	    tmp_ind=$(( tmp_ind + ${#NODE} - 1 ))
@@ -107,9 +109,10 @@ read_user_input() {
     	echo "$COMMAND_STR"
     	read -sn 1 key
 	if [[ "$key" =~ [A-Za-z0-9_!@#$%()+-={}:\;?\'|,.\<\>] ]]; then
+	    # generate char based tree
 	    generate_tree "$key"
 	    restore_and_clear
-	    
+	    # display the generated tree and wait for user input
 	    display_alert "info"
 	    echo "$COMMAND_STR"
 	    read -sn 1 key2
