@@ -25,6 +25,7 @@ bind '"\key1":"\C-a"'
 bind -x '"\key2":"main"'
 bind '"'"$GOTO_KEY"'":"\key1\key2"'   
 
+
 # Save the initial command line.
 save_initial_readline() {
     INITIAL_READLINE_LINE="$READLINE_LINE"
@@ -136,7 +137,7 @@ display_alert() {
     elif [[ $1 == "error" ]]; then
 	echo -n "$REVERSE"
 	echo -n "$RED"
-	echo "ERROR: non valid character"
+	echo "ERROR: invalid character"
 	echo -n "$NORMAL"
     fi
 } 
