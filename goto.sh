@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 
+
 # Global variables
 # WARNING: this is just for test. Should be changed with a not used Key.
 GOTO_KEY="\C-k"               # Key binding to run the program.
 COMMAND_STR=""                # Temporary command line holding the char based tree.
-COMMAND_POINT=""              # Position if selected char.
+COMMAND_POINT=0               # Position if selected char.
 INITIAL_READLINE_LINE=""      # Initial command line string.
-INITIAL_READLINE_POINT=""     # Initial command line point.
+INITIAL_READLINE_POINT=0      # Initial command line point.
 CHAR_NODES=()                 # Nodes of the tree's first level.
 CHARS=( {a..z} )
 EC="$(echo -e '\e')"          # escape key
