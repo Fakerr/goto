@@ -10,9 +10,11 @@ INITIAL_READLINE_LINE=""      # Initial command line string.
 INITIAL_READLINE_POINT=""     # Initial command line point.
 CHAR_NODES=()                 # Nodes of the tree's first level.
 CHARS=( {a..z} )
+EC="$(echo -e '\e')"          # escape key
 declare -A node_position
 
 # Set colors
+RED=$(tput setaf 1)
 BLUE=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 NORMAL=$(tput sgr0)
@@ -61,7 +63,7 @@ restore_and_clear() {
     tput ed # Clear screen
 }
 
-# Init tree nodes
+# Init tree's nodes
 init_tree_nodes() {
     for i in "${CHARS[@]}"
     do
@@ -70,7 +72,7 @@ init_tree_nodes() {
 }
 
 # For each user input, update COMMAND_STR with the new char based tree.
-update_command() {
+generate_tree() {
     key="$1"
     index=0
     tmp_cmd="$INITIAL_READLINE_LINE"
@@ -92,50 +94,51 @@ update_command() {
     COMMAND_STR="$tmp_cmd"
 }
 
+# read user input
 read_user_input() {
-    #stop=false # if equal to true, stop read and exit while loop.
-    save_and_clear
-
-    display_info
-    echo "$COMMAND_STR"
-    read -sn 1 key
-
-    update_command "$key"
-    restore_and_clear
-
-    display_info
-    echo "$COMMAND_STR"
-    read -sn 1 key2
-
-    COMMAND_POINT="${node_position["$key2"]}"
-    restore_and_clear
-
-    # while ! $stop
-    # do
-    #	display_info
-    #	echo "$COMMAND_STR"
-    #	read -sn 1 key
-    #	case "$key" in
-    #	    "a")
-    #		update_command "$key"
-    #		restore_and_clear
-    #		;;
-    #	    "q")
-    #		stop=true
-    #		restore_and_clear
-    #		;;
-    #	    * )
-    #		restore_and_clear
-    #	esac
-    # done
+    stop=false     # if equal to true, exit while loop.
+    save_and_clear # save cursor postion and clear screen
+    alert="info"
+    while ! $stop
+    do
+    	display_alert "$alert"
+    	echo "$COMMAND_STR"
+    	read -sn 1 key
+	if [[ "$key" =~ [A-Za-z0-9_!@#$%()+-={}:\;?\'|,.\<\>] ]]; then
+	    generate_tree "$key"
+	    restore_and_clear
+	    
+	    display_alert "info"
+	    echo "$COMMAND_STR"
+	    read -sn 1 key2
+	    
+	    COMMAND_POINT="${node_position["$key2"]}"
+	    restore_and_clear
+	    stop=true
+	elif [[ "$key" == "$EC" ]]; then
+	    COMMAND_POINT="$INITIAL_READLINE_POINT"
+	    restore_and_clear
+	    stop=true
+	else
+	    alert="error"
+    	    restore_and_clear
+	fi
+    done
 }
 
-# echo info message
-display_info() {
-    echo -n "$REVERSE"
-    echo -n "$YELLOW"
-    echo "goto:"
-    echo -n "$NORMAL"
+# echo alert message
+display_alert() {
+    if [[ $1 == "info" ]]; then
+	echo -n "$REVERSE"
+	echo -n "$YELLOW"
+	echo "goto:"
+	echo -n "$NORMAL"
+    elif [[ $1 == "error" ]]; then
+	echo -n "$REVERSE"
+	echo -n "$RED"
+	echo "ERROR: non valid character"
+	echo -n "$NORMAL"
+    fi
 } 
 
 # main function
