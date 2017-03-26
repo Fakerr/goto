@@ -5,7 +5,7 @@
 # WARNING: this is just for test. Should be changed with a not used Key.
 GOTO_KEY="\C-k"               # Key binding to run the program.
 COMMAND_STR=""                # Temporary command line holding the char based tree.
-COMMAND_POINT=0               # Position if selected char.
+COMMAND_POINT=0               # Selected char position.
 INITIAL_READLINE_LINE=""      # Initial command line string.
 INITIAL_READLINE_POINT=0      # Initial command line point.
 NEXT_LEVEL=false              # True if another level is accessible
@@ -140,25 +140,29 @@ navigate_tree() {
 read_character() {
     stop=false     # if equal to true, exit while loop.
     save_and_clear # save cursor postion and clear screen
-    alert="info"
+    display_alert "info"
     while ! $stop
     do
-    	display_alert "$alert"
     	echo "$COMMAND_STR"
     	read -sn 1 key
 	if [[ "$key" =~ [A-Za-z0-9_!@#$%()+-={}:\;?\'|,.\<\>] ]]; then
 	    generate_tree "$key" # generate char based tree
 	    restore_and_clear
-	    display_alert "info" 
-	    echo "$COMMAND_STR" # display the generated tree and wait for user input
-	    navigate_tree "$key"
+	    first_elt=${node_position["a"]} 
+	    if [[ -z $first_elt ]]; then
+		display_alert "error" 
+	    else
+		display_alert "info" 
+		echo "$COMMAND_STR"
+		navigate_tree "$key"
+	    fi
 	elif [[ "$key" == "$EC" ]]; then
 	    COMMAND_POINT="$INITIAL_READLINE_POINT"
 	    restore_and_clear
 	    stop=true
 	else
-	    alert="error"
     	    restore_and_clear
+	    display_alert "error" 
 	fi
     done
 }
