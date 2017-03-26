@@ -8,6 +8,7 @@ COMMAND_STR=""                # Temporary command line holding the char based tr
 COMMAND_POINT=0               # Position if selected char.
 INITIAL_READLINE_LINE=""      # Initial command line string.
 INITIAL_READLINE_POINT=0      # Initial command line point.
+NEXT_LEVEL=false              # True if another level is accessible
 CHAR_NODES=()                 # Nodes of the tree's first level.
 CHARS=( {a..z} )
 EC="$(echo -e '\e')"          # Escape key
@@ -89,6 +90,7 @@ generate_tree() {
     tmp_cmd="$INITIAL_READLINE_LINE"
     tmp_ind=$start_index
     node_position=()
+    NEXT_LEVEL=false
     for (( i=c; i<${#COMMAND_STR}; i++ )); do
 	char="${COMMAND_STR:$i:1}"
 	if [[ "$char" == "$upper_key" ]] || [[ "$char" == "$lower_key" ]]; then
@@ -100,6 +102,7 @@ generate_tree() {
 		node_position["$node_label"]="$i"
 		index=$(( index + 1 ))
 	    else
+		NEXT_LEVEL=true
 		NODE="${REVERSE}${RED}?${NORMAL}"
 		tmp_cmd="${tmp_cmd:0:$tmp_ind}$NODE${tmp_cmd:$(( tmp_ind + 1 ))}"
 		tmp_ind=$(( tmp_ind + ${#NODE} - 1 ))
@@ -117,7 +120,7 @@ navigate_tree() {
     while ! $end
     do
 	read -sn 1 key2
-	if [[ "$key2" == "?" ]]; then
+	if [[ "$key2" == "?" ]] && [[ $NEXT_LEVEL = true ]]; then
     	    set_temporary_cmd "$INITIAL_READLINE_LINE"
 	    set_start_index $(( ${node_position["z"]} + 1 ))
     	    generate_tree "$goto" 
