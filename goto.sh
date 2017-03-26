@@ -100,9 +100,6 @@ generate_tree() {
 		node_position["$node_label"]="$i"
 		index=$(( index + 1 ))
 	    else
-		if [[ $index -eq 26 ]]; then
-		    set_start_index "$i"
-		fi
 		NODE="${REVERSE}${RED}?${NORMAL}"
 		tmp_cmd="${tmp_cmd:0:$tmp_ind}$NODE${tmp_cmd:$(( tmp_ind + 1 ))}"
 		tmp_ind=$(( tmp_ind + ${#NODE} - 1 ))
@@ -115,14 +112,15 @@ generate_tree() {
 }
 
 navigate_tree() {
-    char="$1"
+    goto="$1"
     end=false
     while ! $end
     do
 	read -sn 1 key2
 	if [[ "$key2" == "?" ]]; then
     	    set_temporary_cmd "$INITIAL_READLINE_LINE"
-    	    generate_tree "$char" 
+	    set_start_index $(( ${node_position["z"]} + 1 ))
+    	    generate_tree "$goto" 
     	    restore_and_clear
     	    display_alert "info"
     	    echo "$COMMAND_STR"
