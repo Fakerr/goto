@@ -14,14 +14,12 @@ CHARS=( {a..z} )
 EC="$(echo -e '\e')"          # Escape key
 declare -A node_position
 
-
 # Set colors
 RED=$(tput setaf 1)
 BLUE=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 NORMAL=$(tput sgr0)
 REVERSE=$(tput rev)
-
 
 # Key bindings. Before executing the main function, place the cursor at the begeninng of the command line (\key1). 
 bind '"\key1":"\C-a"' 
@@ -119,6 +117,7 @@ navigate_tree() {
     end=false
     while ! $end
     do
+    	echo "$COMMAND_STR"
 	read -sn 1 key2
 	if [[ "$key2" == "?" ]] && [[ $NEXT_LEVEL = true ]]; then
     	    set_temporary_cmd "$INITIAL_READLINE_LINE"
@@ -126,12 +125,19 @@ navigate_tree() {
     	    generate_tree "$goto" 
     	    restore_and_clear
     	    display_alert "info"
-    	    echo "$COMMAND_STR"
-	else
+	elif [[ "$key2" =~ [a-z] ]]; then
     	    COMMAND_POINT="${node_position["$key2"]}"
     	    restore_and_clear
 	    end=true
     	    stop=true
+	elif [[ "$key2" == "$EC" ]]; then
+	    COMMAND_POINT="$INITIAL_READLINE_POINT"
+	    restore_and_clear
+	    end=true
+	    stop=true
+	else
+	    restore_and_clear
+    	    display_alert "error"
 	fi
     done
 }
@@ -153,7 +159,6 @@ read_character() {
 		display_alert "error" 
 	    else
 		display_alert "info" 
-		echo "$COMMAND_STR"
 		navigate_tree "$key"
 	    fi
 	elif [[ "$key" == "$EC" ]]; then
