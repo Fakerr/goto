@@ -156,7 +156,7 @@ read_character() {
 	    generate_tree "$key" # generate char based tree
 	    restore_and_clear
 	    first_elt=${node_position["a"]} 
-	    if [[ -z $first_elt ]]; then
+	    if [[ -z "$first_elt" ]]; then
 		display_alert "error" 
 	    else
 		display_alert "info" 
