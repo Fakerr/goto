@@ -10,8 +10,9 @@ INITIAL_READLINE_LINE=""      # Initial command line string.
 INITIAL_READLINE_POINT=0      # Initial command line point.
 CHAR_NODES=()                 # Nodes of the tree's first level.
 CHARS=( {a..z} )
-EC="$(echo -e '\e')"          # escape key
+EC="$(echo -e '\e')"          # Escape key
 declare -A node_position
+
 
 # Set colors
 RED=$(tput setaf 1)
@@ -19,6 +20,7 @@ BLUE=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 NORMAL=$(tput sgr0)
 REVERSE=$(tput rev)
+
 
 # Key bindings. Before executing the main function, place the cursor at the begeninng of the command line (\key1). 
 bind '"\key1":"\C-a"' 
@@ -33,8 +35,13 @@ save_initial_readline() {
 }
 
 # Init temporary command line (temporary READLINE_LINE)
-init_temporary_cmd() {
+set_temporary_cmd() {
     COMMAND_STR="$1"
+}
+
+# Set index starting from where the tree will be generated
+set_start_index() {
+    start_index="$1"
 }
 
 # Clear READLINE_LINE from terminal.
@@ -75,31 +82,61 @@ init_tree_nodes() {
 # For each user input, update COMMAND_STR with the new char based tree.
 generate_tree() {
     key=$1
+    c=$start_index
     upper_key="${key^^}"
     lower_key="${key,,}"
     index=0
     tmp_cmd="$INITIAL_READLINE_LINE"
-    tmp_ind=0
+    tmp_ind=$start_index
     node_position=()
-    for (( i=0; i<${#COMMAND_STR}; i++ )); do
+    for (( i=c; i<${#COMMAND_STR}; i++ )); do
 	char="${COMMAND_STR:$i:1}"
 	if [[ "$char" == "$upper_key" ]] || [[ "$char" == "$lower_key" ]]; then
-	    NODE=${CHAR_NODES[$index]}
-	    tmp_cmd="${tmp_cmd:0:$tmp_ind}$NODE${tmp_cmd:$(( tmp_ind + 1 ))}"
-	    tmp_ind=$(( tmp_ind + ${#NODE} - 1 ))
-
-	    node_label=${CHARS[$index]}
-	    node_position["$node_label"]="$i"
-
-	    index=$(( index + 1 ))
+	    if [[ $index -lt ${#CHARS[@]} ]]; then
+		NODE=${CHAR_NODES[$index]}
+		tmp_cmd="${tmp_cmd:0:$tmp_ind}$NODE${tmp_cmd:$(( tmp_ind + 1 ))}"
+		tmp_ind=$(( tmp_ind + ${#NODE} - 1 ))
+		node_label=${CHARS[$index]}
+		node_position["$node_label"]="$i"
+		index=$(( index + 1 ))
+	    else
+		if [[ $index -eq 26 ]]; then
+		    set_start_index "$i"
+		fi
+		NODE="${REVERSE}${RED}?${NORMAL}"
+		tmp_cmd="${tmp_cmd:0:$tmp_ind}$NODE${tmp_cmd:$(( tmp_ind + 1 ))}"
+		tmp_ind=$(( tmp_ind + ${#NODE} - 1 ))
+		index=$(( index + 1 ))
+	    fi
 	fi
 	tmp_ind=$(( tmp_ind + 1 ))
     done
-    COMMAND_STR="$tmp_cmd"
+    set_temporary_cmd "$tmp_cmd"
 }
 
-# read user input
-read_user_input() {
+navigate_tree() {
+    char="$1"
+    end=false
+    while ! $end
+    do
+	read -sn 1 key2
+	if [[ "$key2" == "?" ]]; then
+    	    set_temporary_cmd "$INITIAL_READLINE_LINE"
+    	    generate_tree "$char" 
+    	    restore_and_clear
+    	    display_alert "info"
+    	    echo "$COMMAND_STR"
+	else
+    	    COMMAND_POINT="${node_position["$key2"]}"
+    	    restore_and_clear
+	    end=true
+    	    stop=true
+	fi
+    done
+}
+
+# read character
+read_character() {
     stop=false     # if equal to true, exit while loop.
     save_and_clear # save cursor postion and clear screen
     alert="info"
@@ -109,17 +146,11 @@ read_user_input() {
     	echo "$COMMAND_STR"
     	read -sn 1 key
 	if [[ "$key" =~ [A-Za-z0-9_!@#$%()+-={}:\;?\'|,.\<\>] ]]; then
-	    # generate char based tree
-	    generate_tree "$key"
+	    generate_tree "$key" # generate char based tree
 	    restore_and_clear
-	    # display the generated tree and wait for user input
-	    display_alert "info"
-	    echo "$COMMAND_STR"
-	    read -sn 1 key2
-	    
-	    COMMAND_POINT="${node_position["$key2"]}"
-	    restore_and_clear
-	    stop=true
+	    display_alert "info" 
+	    echo "$COMMAND_STR" # display the generated tree and wait for user input
+	    navigate_tree "$key"
 	elif [[ "$key" == "$EC" ]]; then
 	    COMMAND_POINT="$INITIAL_READLINE_POINT"
 	    restore_and_clear
@@ -149,13 +180,14 @@ display_alert() {
 # main function
 main() {
     # Initialization
+    set_start_index 0
     init_tree_nodes
     save_initial_readline
-    init_temporary_cmd "$INITIAL_READLINE_LINE"
+    set_temporary_cmd "$INITIAL_READLINE_LINE"
 
     # Clear readline and wait for user input
     clear_readline_line
-    read_user_input
+    read_character
 
     # Update READLINE
     update_readline_line "$INITIAL_READLINE_LINE"
