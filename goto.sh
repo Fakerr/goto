@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 
+
 # Global variables
-# WARNING: this is just for test. Should be changed with a not used Key.
 VERSION="1.0.0"
 GOTO_KEY="\C-k"               # Key binding to run the program.
 COMMAND_STR=""                # Temporary command line holding the char based tree.
