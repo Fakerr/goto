@@ -2,9 +2,11 @@
 
 
 
+# Key binding to run the program. (default \C-k)
+goto_key="${GOTO_KEY:-\C-k}" 
+
 # Global variables
 VERSION="1.0.0"
-GOTO_KEY="\C-k"               # Key binding to run the program.
 COMMAND_STR=""                # Temporary command line holding the char based tree.
 COMMAND_POINT=0               # Selected char position.
 INITIAL_READLINE_LINE=""      # Initial command line string.
@@ -25,8 +27,7 @@ REVERSE=$(tput rev)
 # Key bindings. Before executing the main function, place the cursor at the begeninng of the command line (\key1). 
 bind '"\key1":"\C-a"' 
 bind -x '"\key2":"main"'
-bind '"'"$GOTO_KEY"'":"\key1\key2"'   
-
+bind '"'"$goto_key"'":"\key1\key2"'   
 
 # Save the initial command line.
 save_initial_readline() {
