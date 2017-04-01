@@ -46,4 +46,4 @@ Pull requests are welcome, along with any feedback or ideas.
 
 ## License
 
-MIT
+Copyright Walid Berrahal. Licensed under MIT.
