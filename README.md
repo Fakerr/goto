@@ -2,7 +2,7 @@
 
 > Navigate long command lines using a minimalistic char-based decision tree.
 
-![git recall](http://imgur.com/zuw2LqW.gif)
+![git recall](http://imgur.com/QirIcgE.gif)
 
 ## Introduction
 
@@ -20,8 +20,8 @@ $ git clone https://github.com/Fakerr/git-recall.git
 then add the following to your `.bashrc` (or `.profile` on Mac):
 
 ```sh
-if [[ -s "~/path/to/goto/goto.sh" ]]; then
-	source ~/path/to/goto/goto.sh
+if [[ -s "~/path/to/goto.sh" ]]; then
+	source ~/path/to/goto.sh
 fi
 ```
 ## Usage
