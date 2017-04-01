@@ -6,7 +6,7 @@
 
 ## Introduction
 
-`Goto` is a program for jumping between command lines charcters using a simple char-based decision tree.
+`Goto` is a program for jumping between command lines characters using a simple char-based decision tree.
 This is particulary usefull when you have to deal with long command line, or to avoid the frustration caused by latency when you want to move 
 your cursor while being on remote system. 
 
