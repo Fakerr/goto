@@ -15,7 +15,7 @@ your cursor while being on remote system.
 Clone this project (or just copy goto.sh content somewhere)
 
 ```sh
-$ git clone https://github.com/Fakerr/git-recall.git
+$ git clone https://github.com/Fakerr/goto.git
 ```
 then add the following to your `.bashrc` (or `.profile` on Mac):
 
