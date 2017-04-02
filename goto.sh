@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 
-
 # Key binding to run the program. (default \C-k)
 goto_key="${GOTO_KEY:-\C-k}" 
 
