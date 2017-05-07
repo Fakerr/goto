@@ -20,8 +20,8 @@ $ git clone https://github.com/Fakerr/goto.git
 then add the following to your `.bashrc` (or `.profile` on Mac):
 
 ```sh
-if [[ -s "~/path/to/goto.sh" ]]; then
-	source ~/path/to/goto.sh
+if [[ -s "$HOME/path/to/goto.sh" ]]; then
+	source "$HOME/path/to/goto.sh"
 fi
 ```
 ## Usage
